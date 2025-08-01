@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Bliss - Home</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      background-color: #f3e8ff; /* Soft lavender background */
+      color: #1e1e1e;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 120px;
+      background-color: #9b5de5;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      position: fixed;
+      height: 100vh;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar img.logo {
+      width: 48px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 20px;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .sidebar button:hover {
+      color: #ffd6ff;
+    }
+
+    .sidebar button img {
+      width: 30px;
+      margin-bottom: 7px;
+    }
+
+    /* Main Content */
+    .main {
+      margin-left: 90px;
+      padding: 40px;
+      width: calc(100% - 90px);
+    }
+
+    h1 {
+      text-align: center;
+      color: #6a0dad;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      margin-top: 50px;
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.4rem;
+      border-left: 5px solid #9b5de5;
+      padding-left: 10px;
+    }
+
+    .section {
+      margin-bottom: 50px;
+    }
+
+    .book-row, .author-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 25px;
+    }
+
+    .book-row img, .author-row img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .book-row img:hover, .author-row img:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .main {
+        padding: 20px;
+      }
+    .logo { font-size: 1.5rem; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+
+      .sidebar {
+        width: 200px;
+      }
+
+      .sidebar button {
+        font-size: 40px;
+      }
+
+      .book-row img, .author-row img {
+        height: 200px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">📖<span>BookBliss</span></div>
+   <button>Browse</button>
+<button>Community</button>
+<button>Settings</button>
+<button>About</button>
+<button>AI</button>
+
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1>BOOK BLISS — YOUR PERFECT BOOK PARTNER</h1>
+
+    <!-- Best Reviewed Section -->
+    <div class="section">
+      <h2>🌟 Best Reviewed Books This Week</h2>
+      <div class="book-row" id="best-reviewed"></div>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div class="section">
+      <h2>📚 Recommended For You</h2>
+      <div class="book-row" id="recommendations"></div>
+    </div>
+
+    <!-- Authors Section -->
+    <div class="section">
+      <h2>✍️ Featured Authors</h2>
+      <div class="author-row" id="authors"></div>
+    </div>
+  </div>
+
+  <script>
+    const books = [
+      { title: "Book 1", img: "images/book1.jpg" },
+      { title: "Book 2", img: "images/book2.jpg" },
+      { title: "Book 3", img: "images/book3.jpg" },
+      { title: "Book 4", img: "images/book.jpg" },
+      { title: "Book 5", img: "images/book5.jpg" },
+      { title: "Book 6", img: "images/book6.jpg" },
+      { title: "Book 7", img: "images/book7.jpg" },
+      { title: "Book 8", img: "images/book8.jpg" },
+    ];
+
+    const authors = [
+      { name: "Author 1", img: "images/author1.jpg" },
+      { name: "Author 2", img: "images/author2.jpg" },
+      { name: "Author 3", img: "images/author3.jpg" },
+      { name: "Author 4", img: "images/author4.jpg" },
+    ];
+
+    // Inject Books
+    document.getElementById('best-reviewed').innerHTML =
+      books.slice(0, 4).map(b => `<img src="${b.img}" alt="${b.title}" title="${b.title}" />`).join('');
+    document.getElementById('recommendations').innerHTML =
+      books.slice(4).map(b => `<img src="${b.img}" alt="${b.title}" title="${b.title}" />`).join('');
+
+    // Inject Authors
+    document.getElementById('authors').innerHTML =
+      authors.map(a => `<img src="${a.img}" alt="${a.name}" title="${a.name}" />`).join('');
+  </script>
+</body>
+</html>
