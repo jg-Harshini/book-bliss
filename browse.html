@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Browse BookBliss</title>
+
+  <!-- AngularJS + ngAnimate -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
     }
-.main {
-  margin-left: 180px; /* Match new sidebar width */
-  padding: 40px 25px;
-  width: calc(100% - 180px);
-}
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,45 +21,39 @@
       color: #3c3c3c;
     }
 
-    /* Sidebar */
     .sidebar {
-  width: 180px; /* Increased from 80px to 180px */
-  background-color: #9b5de5;
-  padding-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  position: fixed;
-  height: 100vh;
-}
+      width: 180px;
+      background-color: #9b5de5;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      position: fixed;
+      height: 100vh;
+    }
 
-.sidebar button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: white;
-  font-size: 20px;
-  text-align: center;
-  white-space: nowrap;
-  width: 100%;
-  padding: 10px 0;
-}
-    .logo { font-size: 1.5rem; margin-bottom: 20px; display: fit; gap: 10px; align-items: left; }
+    .sidebar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 20px;
+      text-align: center;
+      white-space: nowrap;
+      width: 100%;
+      padding: 10px 0;
+    }
 
-
-    .sidebar .logo {
-      width: 50px;
+    .logo {
+      font-size: 1.5rem;
       margin-bottom: 20px;
     }
 
-    
-
-    /* Main container */
     .main {
-      margin-left: 80px;
+      margin-left: 180px;
       padding: 40px 25px;
-      width: calc(100% - 80px);
+      width: calc(100% - 180px);
     }
 
     .container {
@@ -82,7 +75,6 @@
       font-size: 2.2rem;
       font-weight: 700;
       color: #5b2db2;
-      user-select: none;
     }
 
     .filters {
@@ -96,7 +88,6 @@
     .filters label {
       font-weight: 600;
       color: #6a4fbf;
-      user-select: none;
       min-width: 100px;
     }
 
@@ -107,7 +98,6 @@
       font-size: 15px;
       border-radius: 8px;
       border: 1.5px solid #c8bff7;
-      transition: border-color 0.3s ease;
       min-width: 150px;
       outline-offset: 2px;
     }
@@ -130,8 +120,6 @@
       color: #5b2db2;
       transition: background-color 0.25s ease;
       height: 38px;
-      line-height: 38px;
-      user-select: none;
     }
 
     .filters button:hover {
@@ -158,13 +146,11 @@
       color: #5b2db2;
       transition: all 0.3s ease;
       user-select: none;
-      box-shadow: 0 2px 6px rgba(101, 78, 190, 0.1);
     }
 
     .genres button:hover {
       background-color: #bba4f7;
       color: #3f1c7a;
-      box-shadow: 0 4px 12px rgba(101, 78, 190, 0.3);
     }
 
     .genres .active {
@@ -201,9 +187,8 @@
       height: 230px;
       object-fit: cover;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(101, 78, 190, 0.1);
       margin-bottom: 14px;
-      transition: transform 0.4s ease;
+      transition: transform 1s ease;
     }
 
     .book:hover img {
@@ -224,17 +209,20 @@
       font-style: italic;
     }
 
-    @media (max-width: 720px) {
-      .filters label {
-        min-width: 80px;
-      }
+    .fade.ng-enter {
+      opacity: 30;
+    }
 
-      .filters input[type="text"], 
-      .filters select, 
-      .filters input[type="date"] {
+    .fade.ng-enter-active {
+      opacity: 15;
+      transition: opacity 2s ease-in-out;
+    }
+
+    @media (max-width: 720px) {
+      .filters label { min-width: 80px; }
+      .filters input[type="text"], .filters select, .filters input[type="date"] {
         min-width: 120px;
       }
-
       .book-grid {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 20px;
@@ -244,8 +232,6 @@
 </head>
 
 <body ng-controller="BrowseController">
-
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">📖<span>BookBliss</span></div>
     <button>Browse</button>
@@ -255,7 +241,6 @@
     <button>AI</button>
   </div>
 
-  <!-- Main Content -->
   <div class="main">
     <div class="container">
       <div class="header">📚 Browse BookBliss</div>
@@ -284,60 +269,88 @@
       </div>
 
       <div class="book-grid">
-        <div class="book" 
-             ng-repeat="book in books | filter:filterByAuthor | filter:filterByGenre | filter:filterByDate">
-          <img ng-src="{{ book.cover }}" alt="Cover of {{book.title}}" />
-          <div class="book-title" ng-bind="book.title"></div>
-          <div class="book-date" ng-bind="'Updated ' + book.updated"></div>
-        </div>
+        <book-card class="fade"
+          ng-repeat="book in books | filter:filterByAuthor | filter:filterByGenre | filter:filterByDate"
+          book="book">
+        </book-card>
       </div>
     </div>
   </div>
 
+  <!-- AngularJS Application Script -->
   <script>
-    const app = angular.module('bookApp', []);
+    const app = angular.module('bookApp', ['ngAnimate']);
 
-    app.controller('BrowseController', function($scope) {
-      $scope.books = [
-        { title: "Catching Fire", author: "Suzanne Collins", genre: "thriller", release: "2009-09-01", updated: "today", cover: "https://books.google.co.in/books/content?id=FN5wMOZKTYMC&pg=PP1&img=1&zoom=3&hl=en&bul=1&sig=ACfU3U2JjJTabbXeNV_1WgueuGibB081gQ&w=1280" },
-        { title: "A million to one", author: "Tony Faggioli", genre: "mystery", release: "2018-02-20", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/71ErnKz89ML._AC_UF1000,1000_QL80_.jpg" },
-        { title: "A Tiger's heart", author: "Linda Coggin", genre: "fantasy", release: "2015-03-15", updated: "2 days ago", cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1393598275i/20935190.jpg" },
-        { title: "No mountain too high", author: "Patrick E. Moore", genre: "motivation", release: "2005-06-10", updated: "today", cover: "https://m.media-amazon.com/images/I/81O5yZjhiaL._UF1000,1000_QL80_.jpg" },
-        { title: "Pieces of light", author: "Charles Fernyhough", genre: "horror", release: "2013-05-10", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/91G++DMK2+L._UF1000,1000_QL80_.jpg" }
-      ];
+    // Genre Factory
+    app.factory('GenreFactory', function () {
+      return ["horror", "thriller", "mystery", "fantasy", "motivation"];
+    });
 
-      $scope.search = { author: '' };
-      $scope.filterDate = { type: 'before', date: '2000-12-01' };
-      $scope.genres = ["horror", "thriller", "mystery", "fantasy", "motivation"];
-      $scope.selectedGenre = "";
-
-      $scope.setGenre = function(genre) {
-        $scope.selectedGenre = ($scope.selectedGenre === genre) ? "" : genre;
-      };
-
-      $scope.clearAuthor = function() {
-        $scope.search.author = "";
-      };
-
-      $scope.filterByAuthor = function(book) {
-        if (!$scope.search.author) return true;
-        return book.author.toLowerCase().includes($scope.search.author.toLowerCase());
-      };
-
-      $scope.filterByGenre = function(book) {
-        if (!$scope.selectedGenre) return true;
-        return book.genre === $scope.selectedGenre;
-      };
-
-      $scope.filterByDate = function(book) {
-        if (!$scope.filterDate.date) return true;
-        let bookDate = new Date(book.release);
-        let filterDate = new Date($scope.filterDate.date);
-        return $scope.filterDate.type === 'before' 
-          ? bookDate < filterDate 
-          : bookDate > filterDate;
+    // Book Card Directive
+    app.directive('bookCard', function () {
+      return {
+        restrict: 'E',
+        scope: { book: '=' },
+        template: `
+          <div class="book">
+            <img ng-src="{{ book.cover }}" alt="Cover of {{ book.title }}">
+            <div class="book-title">{{ book.title }}</div>
+            <div class="book-date">Updated {{ book.updated }}</div>
+          </div>
+        `
       };
     });
+
+   app.controller('BrowseController', function ($scope, $http, GenreFactory) {
+  $scope.books = [];
+  $scope.genres = GenreFactory;
+  $scope.selectedGenre = "";
+  $scope.search = { author: '' };
+  $scope.filterDate = { type: 'before', date: '2000-12-01' };
+
+  $scope.setGenre = function (genre) {
+    $scope.selectedGenre = ($scope.selectedGenre === genre) ? "" : genre;
+  };
+
+  $scope.clearAuthor = function () {
+    $scope.search.author = "";
+  };
+
+  $scope.filterByAuthor = function (book) {
+    if (!$scope.search.author) return true;
+    return book.author.toLowerCase().includes($scope.search.author.toLowerCase());
+  };
+
+  $scope.filterByGenre = function (book) {
+    if (!$scope.selectedGenre) return true;
+    return book.genre === $scope.selectedGenre;
+  };
+
+  $scope.filterByDate = function (book) {
+    if (!$scope.filterDate.date) return true;
+    const bookDate = new Date(book.release);
+    const filterDate = new Date($scope.filterDate.date);
+    return $scope.filterDate.type === 'before'
+      ? bookDate < filterDate
+      : bookDate > filterDate;
+  };
+
+  // Fake API using $http.get with inline JSON (data URI)
+  const booksData = [
+    { title: "Catching Fire", author: "Suzanne Collins", genre: "thriller", release: "2009-09-01", updated: "today", cover: "https://books.google.co.in/books/content?id=FN5wMOZKTYMC&pg=PP1&img=1&zoom=3&hl=en&bul=1&sig=ACfU3U2JjJTabbXeNV_1WgueuGibB081gQ&w=1280" },
+    { title: "A Million to One", author: "Tony Faggioli", genre: "mystery", release: "2018-02-20", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/71ErnKz89ML._AC_UF1000,1000_QL80_.jpg" },
+    { title: "A Tiger's Heart", author: "Linda Coggin", genre: "fantasy", release: "2015-03-15", updated: "2 days ago", cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1393598275i/20935190.jpg" },
+    { title: "No Mountain Too High", author: "Patrick E. Moore", genre: "motivation", release: "2005-06-10", updated: "today", cover: "https://m.media-amazon.com/images/I/81O5yZjhiaL._UF1000,1000_QL80_.jpg" },
+    { title: "Pieces of Light", author: "Charles Fernyhough", genre: "horror", release: "2013-05-10", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/91G++DMK2+L._UF1000,1000_QL80_.jpg" }
+  ];
+
+  // Simulate async fetch
+  setTimeout(() => {
+    $scope.books = booksData;
+    $scope.$apply(); 
+  }, 500);
+});
+
   </script>
 </body>
 </html>

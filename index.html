@@ -27,8 +27,11 @@
       box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     }
 
-    .sidebar img.logo {
-      width: 48px;
+    .sidebar .logo {
+      font-size: 1.2rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
     .sidebar button {
@@ -36,25 +39,21 @@
       border: none;
       cursor: pointer;
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       text-align: center;
       transition: color 0.3s;
+      width: 100%;
     }
 
     .sidebar button:hover {
       color: #ffd6ff;
     }
 
-    .sidebar button img {
-      width: 30px;
-      margin-bottom: 7px;
-    }
-
     /* Main Content */
     .main {
-      margin-left: 90px;
+      margin-left: 120px;
       padding: 40px;
-      width: calc(100% - 90px);
+      width: calc(100% - 120px);
     }
 
     h1 {
@@ -102,22 +101,26 @@
       .main {
         padding: 20px;
       }
-    .logo { font-size: 1.5rem; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+
+      h1 {
+        font-size: 1.6rem;
+      }
 
       .sidebar {
-        width: 200px;
+        width: 100px;
+      }
+
+      .main {
+        margin-left: 100px;
+        width: calc(100% - 100px);
       }
 
       .sidebar button {
-        font-size: 40px;
+        font-size: 14px;
       }
 
       .book-row img, .author-row img {
         height: 200px;
-      }
-
-      h1 {
-        font-size: 1.6rem;
       }
     }
   </style>
@@ -125,13 +128,13 @@
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="logo">📖<span>BookBliss</span></div>
-   <button>Browse</button>
-<button>Community</button>
-<button>Settings</button>
-<button>About</button>
-<button>AI</button>
-
+    <div class="logo">📖<br/>BookBliss</div>
+    <button onclick="location.href='index.html'">Home</button>
+    <button onclick="location.href='browse.html'">Browse</button>
+    <button onclick="location.href='community.html'">Community</button>
+    <button onclick="location.href='settings.html'">Settings</button>
+    <button onclick="location.href='about.html'">About</button>
+    <button onclick="location.href='ai.html'">AI Support</button>
   </div>
 
   <!-- Main Content -->
@@ -157,6 +160,7 @@
     </div>
   </div>
 
+  <!-- Scripts -->
   <script>
     const books = [
       { title: "Book 1", img: "images/book1.jpg" },

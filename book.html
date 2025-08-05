@@ -21,7 +21,17 @@
 
     .author-info { display: flex; gap: 20px; margin-top: 10px; }
     .author-info img { width: 120px; height: auto; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-
+    .sidebar {
+  width: 180px; /* Increased from 80px to 180px */
+  background-color: #9b5de5;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: fixed;
+  height: 100vh;
+}
     .comment-section { margin-top: 50px; }
     .comment-section h2 { margin-bottom: 10px; }
     .comment-box textarea {
@@ -46,17 +56,13 @@
 </head>
 <body>
   <div class="sidebar">
-    <div class="logo">📖<span>BookBliss</span></div>
-    <nav>
-      <button class="nav-btn">☰</button>
-      <ul>
-        <li><button>Browse</button></li>
-        <li><button>Community</button></li>
-        <li><button>Setting</button></li>
-        <li><button>About Us</button></li>
-        <li><button>AI Support</button></li>
-      </ul>
-    </nav>
+    <div class="logo">📖<br/>BookBliss</div>
+    <button onclick="location.href='index.html'">Home</button>
+    <button onclick="location.href='browse.html'">Browse</button>
+    <button onclick="location.href='community.html'">Community</button>
+    <button onclick="location.href='settings.html'">Settings</button>
+    <button onclick="location.href='about.html'">About</button>
+    <button onclick="location.href='ai.html'">AI Support</button>
   </div>
 
   <main>
@@ -191,3 +197,5 @@
   </script>
 </body>
 </html>
+
+
