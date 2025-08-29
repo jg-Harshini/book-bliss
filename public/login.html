@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Book Bliss</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('images/back.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 40px;
+      border-radius: 20px;
+      width: 350px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .login-container h1 {
+      margin-bottom: 10px;
+      color: #4b0082;
+    }
+
+    .login-container p {
+      margin-bottom: 25px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #4b0082;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .footer a {
+      color: #4b0082;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+    }
+
+    .success {
+      color: green;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body ng-controller="AuthCtrl">
+  <div class="login-container">
+    <h1>Book Bliss</h1>
+    <form ng-submit="login()">
+      <input type="text" ng-model="username" placeholder="Username" required />
+      <div class="error" ng-if="usernameError">{{usernameError}}</div>
+
+      <input type="password" ng-model="password" placeholder="Password" required minlength="6" />
+      <div class="error" ng-if="passwordError">{{passwordError}}</div>
+
+      <input type="submit" value="Login" />
+    </form>
+    <p class="error" ng-if="errorMessage">{{errorMessage}}</p>
+    <p class="success" ng-if="successMessage">{{successMessage}}</p>
+
+  <div class="footer">
+  <p>Don't have an account? <a href="register.html">Register here</a></p>
+</div>
+
+  </div>
+
+  <!-- AngularJS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script>
+    angular.module('myApp', [])
+      .controller('AuthCtrl', function($scope, $http) {
+        $scope.username = '';
+        $scope.password = '';
+        $scope.errorMessage = '';
+        $scope.successMessage = '';
+
+        $scope.login = function() {
+          $scope.errorMessage = '';
+          $scope.successMessage = '';
+
+          if (!$scope.username) {
+            $scope.errorMessage = "Username is required.";
+            return;
+          }
+          if (!$scope.password || $scope.password.length < 6) {
+            $scope.errorMessage = "Password must be at least 6 characters.";
+            return;
+          }
+
+          $http.post('/api/auth/login', {
+            username: $scope.username,
+            password: $scope.password
+          }).then(function(response) {
+            $scope.successMessage = response.data.message;
+            localStorage.setItem('userId', response.data.userId);
+
+            // redirect after login success
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 1000);
+          }, function(error) {
+            $scope.errorMessage = error.data.message || "Login failed.";
+          });
+        };
+      });
+  </script>
+</body>
+</html>
