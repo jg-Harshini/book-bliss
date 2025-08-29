@@ -13,11 +13,12 @@ app.use(cors());
 app.use(express.static('public')); // Serve frontend files
 
 // MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017                                                                                                                                                                                                                                                                                                                                                       /loginApp', {
+mongoose.connect('mongodb://127.0.0.1:27017/bookbliss', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB error:', err));
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB error:', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
