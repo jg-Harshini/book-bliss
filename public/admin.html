@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-controller="AdminCtrl">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #9b5de5, #f3e8ff);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      margin-top: 40px;
+      padding: 30px;
+      border-radius: 16px;
+      width: 500px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #6a0dad;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: #6a0dad;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #6a0dad;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #4b0082;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .delete-btn {
+      width: auto;
+      padding: 6px 12px;
+      background: #dc3545;
+      margin-left: 10px;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f9f0ff;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .book-info {
+      flex-grow: 1;
+    }
+
+    li strong {
+      color: #333;
+    }
+
+    .rating {
+      color: #ff9800;
+      font-weight: bold;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .book-cover {
+      width: 40px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    .book-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .loading {
+      text-align: center;
+      color: #6a0dad;
+      padding: 20px;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .success {
+      background: #d1edff;
+      color: #0c5460;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .status-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      border-radius: 20px;
+      color: white;
+      font-size: 14px;
+      z-index: 1000;
+    }
+
+    .status-connected {
+      background: #28a745;
+    }
+
+    .status-disconnected {
+      background: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="status-indicator" ng-class="{'status-connected': serverConnected, 'status-disconnected': !serverConnected}">
+    {{serverConnected ? '🟢 Connected to Database' : '🔴 Database Disconnected'}}
+  </div>
+
+  <div class="container">
+    <h2>📚 Add New Book</h2>
+    
+    <div ng-if="message" ng-class="{'error': messageType === 'error', 'success': messageType === 'success'}">
+      {{message}}
+    </div>
+
+    <form ng-submit="addBook()" name="bookForm">
+      <input type="text" ng-model="book.title" placeholder="Book Name" required>
+      <input type="text" ng-model="book.author" placeholder="Author" required>
+      <input type="number" ng-model="book.year" placeholder="Year" min="1000" max="2025" required>
+      <input type="text" ng-model="book.genre" placeholder="Genre" required>
+      <input type="text" ng-model="book.cover" placeholder="Cover Image URL">
+      <button type="submit" ng-disabled="bookForm.$invalid || loading">
+        {{loading ? 'Adding Book...' : 'Add Book'}}
+      </button>
+    </form>
+
+    <h3>📖 Books List ({{books.length}} books)</h3>
+    
+    <div ng-if="booksLoading" class="loading">
+      Loading books from database...
+    </div>
+    
+    <div ng-if="!booksLoading && books.length === 0" class="empty-state">
+      No books in database yet. Add your first book above!
+    </div>
+    
+    <ul ng-if="!booksLoading && books.length > 0">
+      <li ng-repeat="b in books track by b._id">
+        <div class="book-row">
+          <img ng-if="b.cover" ng-src="{{b.cover}}" alt="Book cover" class="book-cover" 
+               onerror="this.style.display='none'">
+          <div class="book-info">
+            <strong>{{b.title}}</strong> by {{b.author}} ({{b.year}}) 
+            — Genre: {{b.genre}} 
+            <span class="rating">⭐ {{b.rating || 'No rating'}}</span>
+          </div>
+        </div>
+        <button class="delete-btn" ng-click="deleteBook(b._id, $index)" ng-disabled="loading">
+          Delete
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    // Create the AngularJS app
+    var app = angular.module('myApp', []);
+
+    // Controller with proper database integration
+    app.controller('AdminCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+      // Initialize scope variables
+      $scope.books = [];
+      $scope.book = { title: '', author: '', year: '', genre: '', cover: '', rating: 0 };
+      $scope.loading = false;
+      $scope.booksLoading = true;
+      $scope.serverConnected = false;
+      $scope.message = '';
+      $scope.messageType = '';
+
+      // Function to show messages
+      function showMessage(msg, type) {
+        $scope.message = msg;
+        $scope.messageType = type;
+        $timeout(function() {
+          $scope.message = '';
+        }, 3000);
+      }
+
+      // Function to add a new book
+      $scope.addBook = function() {
+        if ($scope.book.title && $scope.book.author && $scope.book.year && $scope.book.genre) {
+          $scope.loading = true;
+          
+          $http.post('/api/books', $scope.book)
+            .then(function(response) {
+              $scope.books.push(response.data);
+              $scope.book = { title: '', author: '', year: '', genre: '', cover: '', rating: 0 };
+              $scope.bookForm.$setPristine();
+              $scope.bookForm.$setUntouched();
+              showMessage('Book added successfully!', 'success');
+              $scope.serverConnected = true;
+            })
+            .catch(function(error) {
+              console.error('Error adding book:', error);
+              showMessage('Error adding book to database', 'error');
+              $scope.serverConnected = false;
+            })
+            .finally(function() {
+              $scope.loading = false;
+            });
+        }
+      };
+
+      // Function to delete a book
+      $scope.deleteBook = function(bookId, index) {
+        if (confirm('Are you sure you want to delete this book?')) {
+          $scope.loading = true;
+          
+          $http.delete('/api/books/' + bookId)
+            .then(function(response) {
+              $scope.books.splice(index, 1);
+              showMessage('Book deleted successfully!', 'success');
+            })
+            .catch(function(error) {
+              console.error('Error deleting book:', error);
+              showMessage('Error deleting book from database', 'error');
+            })
+            .finally(function() {
+              $scope.loading = false;
+            });
+        }
+      };
+
+      // Load books from database
+      function loadBooks() {
+        $scope.booksLoading = true;
+        
+        $http.get('/api/books')
+          .then(function(response) {
+            $scope.books = response.data;
+            $scope.serverConnected = true;
+            console.log('Books loaded:', $scope.books.length);
+          })
+          .catch(function(error) {
+            console.error('Error loading books:', error);
+            $scope.serverConnected = false;
+            showMessage('Could not connect to database', 'error');
+          })
+          .finally(function() {
+            $scope.booksLoading = false;
+          });
+      }
+
+      // Load books when controller initializes
+      loadBooks();
+
+      // Test server connection periodically
+      function checkConnection() {
+        $http.get('/api/books')
+          .then(function() {
+            $scope.serverConnected = true;
+          })
+          .catch(function() {
+            $scope.serverConnected = false;
+          });
+      }
+
+      // Check connection every 30 seconds
+      setInterval(checkConnection, 30000);
+    }]);
+  </script>
+</body>
+</html>

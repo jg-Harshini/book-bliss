@@ -124,7 +124,6 @@
         $scope.password = '';
         $scope.errorMessage = '';
         $scope.successMessage = '';
-
         $scope.login = function() {
           $scope.errorMessage = '';
           $scope.successMessage = '';
@@ -138,20 +137,25 @@
             return;
           }
 
-          $http.post('/api/auth/login', {
-            username: $scope.username,
-            password: $scope.password
-          }).then(function(response) {
-            $scope.successMessage = response.data.message;
-            localStorage.setItem('userId', response.data.userId);
+  $http.post('/api/auth/login', {
+  username: $scope.username,
+  password: $scope.password
+}).then(function(response) {
+  $scope.successMessage = response.data.message;
+  localStorage.setItem('userId', response.data.userId);
 
-            // redirect after login success
-            setTimeout(() => {
-              window.location.href = "index.html";
-            }, 1000);
-          }, function(error) {
-            $scope.errorMessage = error.data.message || "Login failed.";
-          });
+  // redirect based on email type
+  setTimeout(() => {
+    if ($scope.username.endsWith('@admin')) {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "user.html";
+    }
+  }, 1000);
+}, function(error) {
+  $scope.errorMessage = error.data.message || "Login failed.";
+});
+
         };
       });
   </script>

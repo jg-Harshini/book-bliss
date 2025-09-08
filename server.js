@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
 const authRoutes = require('./routes/auth');
+const bookRoutes = require('./routes/Admin');
 
 const app = express();
 
@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.static('public')); // Serve frontend files
 
 // MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/bookbliss', {
+mongoose.connect('mongodb+srv://thorhammer78165:fcHevi0MBKJ5l83P@cluster.a0zl0xi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -22,6 +22,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/bookbliss', {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/books', bookRoutes);
 
 app.get('/', (req, res) => {
   res.send('Login app is running...');
