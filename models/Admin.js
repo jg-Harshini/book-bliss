@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({
   title: String,
-  author: String,
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'Author' }, // ✅ link to Author
   year: Number,
   genre: String,
   cover: String,

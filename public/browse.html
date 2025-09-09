@@ -246,19 +246,24 @@
     <div class="container">
       <div class="header">📚 Browse BookBliss</div>
 
-      <div class="filters">
-        <label for="dateType">Release Year:</label>
-        <select id="dateType" ng-model="filterDate.type">
-          <option value="before">Before</option>
-          <option value="after">After</option>
-        </select>
+   <div class="filters">
+<!-- Author Dropdown -->
+<select ng-model="selectedAuthor">
+  <option value="">All Authors</option>
+  <option ng-repeat="author in authors" value="{{author._id}}">
+    {{author.name}}
+  </option>
+</select>
 
-        <input type="date" ng-model="filterDate.date" />
+<!-- Year Filter -->
+<select ng-model="yearFilter.type">
+  <option value="before">Before</option>
+  <option value="after">After</option>
+</select>
+<input type="number" ng-model="yearFilter.year" placeholder="Enter Year">
 
-        <label for="authorSearch">Author:</label>
-        <input id="authorSearch" type="text" ng-model="search.author" placeholder="Author name" />
-        <button ng-click="clearAuthor()">✕</button>
-      </div>
+</div>
+
 
       <div class="genres">
         <button 
@@ -270,88 +275,90 @@
       </div>
 
       <div class="book-grid">
-        <book-card class="fade"
-          ng-repeat="book in books | filter:filterByAuthor | filter:filterByGenre | filter:filterByDate"
-          book="book">
-        </book-card>
+<book-card class="fade"
+  ng-repeat="book in books | filter:masterFilter"
+  book="book">
+</book-card>
+
       </div>
     </div>
   </div>
 
   <!-- AngularJS Application Script -->
-  <script>
-    const app = angular.module('bookApp', ['ngAnimate']);
+<script>
+const app = angular.module('bookApp', ['ngAnimate']);
 
-    // Genre Factory
-    app.factory('GenreFactory', function () {
-      return ["horror", "thriller", "mystery", "fantasy", "motivation"];
-    });
+// ✅ Genre Factory
+app.factory('GenreFactory', function () {
+  return ["Horror", "Thriller", "Mystery", "Fantasy", "Motivation"];
+});
 
-    // Book Card Directive
-    app.directive('bookCard', function () {
-      return {
-        restrict: 'E',
-        scope: { book: '=' },
-        template: `
-          <div class="book">
-            <img ng-src="{{ book.cover }}" alt="Cover of {{ book.title }}">
-            <div class="book-title">{{ book.title }}</div>
-            <div class="book-date">Updated {{ book.updated }}</div>
-          </div>
-        `
-      };
-    });
+// ✅ Book Card Directive
+app.directive('bookCard', function () {
+  return {
+    restrict: 'E',
+    scope: { book: '=' },
+    template: `
+      <div class="book">
+        <img ng-src="{{ book.cover }}" alt="Cover of {{ book.title }}">
+        <div class="book-title">{{ book.title }}</div>
+        <div class="book-date">By {{ book.author.name }} • {{ book.year }}</div>
+        <div class="book-genre">{{ book.genre }}</div>
+      </div>
+    `
+  };
+});
 
-   app.controller('BrowseController', function ($scope, $http, GenreFactory) {
+// ✅ Controller
+app.controller('BrowseController', function ($scope, $http, GenreFactory) {
   $scope.books = [];
+  $scope.authors = [];
   $scope.genres = GenreFactory;
   $scope.selectedGenre = "";
-  $scope.search = { author: '' };
-  $scope.filterDate = { type: 'before', date: '2000-12-01' };
+  $scope.selectedAuthor = "";
+  $scope.yearFilter = { type: 'before', year: "" };
 
+  // Toggle Genre filter
   $scope.setGenre = function (genre) {
     $scope.selectedGenre = ($scope.selectedGenre === genre) ? "" : genre;
   };
 
-  $scope.clearAuthor = function () {
-    $scope.search.author = "";
-  };
-
+  // ✅ Author filter
   $scope.filterByAuthor = function (book) {
-    if (!$scope.search.author) return true;
-    return book.author.toLowerCase().includes($scope.search.author.toLowerCase());
+    if (!$scope.selectedAuthor) return true;
+    return book.author && book.author._id === $scope.selectedAuthor;
   };
 
+  // ✅ Genre filter
   $scope.filterByGenre = function (book) {
     if (!$scope.selectedGenre) return true;
-    return book.genre === $scope.selectedGenre;
+    return book.genre && book.genre.toLowerCase() === $scope.selectedGenre.toLowerCase();
   };
 
-  $scope.filterByDate = function (book) {
-    if (!$scope.filterDate.date) return true;
-    const bookDate = new Date(book.release);
-    const filterDate = new Date($scope.filterDate.date);
-    return $scope.filterDate.type === 'before'
-      ? bookDate < filterDate
-      : bookDate > filterDate;
+  // ✅ Year filter
+  $scope.filterByYear = function (book) {
+    if (!$scope.yearFilter.year) return true;
+    return $scope.yearFilter.type === 'before'
+      ? parseInt(book.year) < parseInt($scope.yearFilter.year)
+      : parseInt(book.year) > parseInt($scope.yearFilter.year);
   };
 
-  // Fake API using $http.get with inline JSON (data URI)
-  const booksData = [
-    { title: "Catching Fire", author: "Suzanne Collins", genre: "thriller", release: "2009-09-01", updated: "today", cover: "https://books.google.co.in/books/content?id=FN5wMOZKTYMC&pg=PP1&img=1&zoom=3&hl=en&bul=1&sig=ACfU3U2JjJTabbXeNV_1WgueuGibB081gQ&w=1280" },
-    { title: "A Million to One", author: "Tony Faggioli", genre: "mystery", release: "2018-02-20", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/71ErnKz89ML._AC_UF1000,1000_QL80_.jpg" },
-    { title: "A Tiger's Heart", author: "Linda Coggin", genre: "fantasy", release: "2015-03-15", updated: "2 days ago", cover: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1393598275i/20935190.jpg" },
-    { title: "No Mountain Too High", author: "Patrick E. Moore", genre: "motivation", release: "2005-06-10", updated: "today", cover: "https://m.media-amazon.com/images/I/81O5yZjhiaL._UF1000,1000_QL80_.jpg" },
-    { title: "Pieces of Light", author: "Charles Fernyhough", genre: "horror", release: "2013-05-10", updated: "yesterday", cover: "https://m.media-amazon.com/images/I/91G++DMK2+L._UF1000,1000_QL80_.jpg" }
-  ];
+  // ✅ Fetch authors dynamically from Express API
+  $http.get("http://localhost:5000/api/authors")
+    .then(function (response) {
+      $scope.authors = response.data; 
+    })
+    .catch(err => console.error("Error fetching authors:", err));
 
-  // Simulate async fetch
-  setTimeout(() => {
-    $scope.books = booksData;
-    $scope.$apply(); 
-  }, 500);
+  // ✅ Fetch books dynamically from Express API
+  $http.get("http://localhost:5000/api/books")
+    .then(function (response) {
+      $scope.books = response.data; 
+    })
+    .catch(err => console.error("Error fetching books:", err));
 });
+</script>
 
-  </script>
+
 </body>
 </html>

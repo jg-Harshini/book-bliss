@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="authorApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Author Details - Book Bliss</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      background-color: #f3e8ff;
+      color: #1e1e1e;
+    }
+    .sidebar {
+      width: 120px;
+      background-color: #9b5de5;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      position: fixed;
+      height: 100vh;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+    .sidebar .logo {
+      font-size: 1.2rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .sidebar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 18px;
+      text-align: center;
+      transition: color 0.3s;
+      width: 100%;
+    }
+    .sidebar button:hover { color: #ffd6ff; }
+
+    .main {
+      margin-left: 120px;
+      padding: 40px;
+      width: calc(100% - 120px);
+    }
+
+    h1 {
+      text-align: center;
+      color: #6a0dad;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .author-details {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin-bottom: 40px;
+    }
+    .author-details img {
+      width: 220px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .author-info {
+      flex: 1;
+    }
+    .author-info h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.6rem;
+    }
+    .author-info p {
+      margin: 8px 0;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .author-info strong {
+      color: #6a0dad;
+    }
+
+    /* Comments section */
+    .comments {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .comments h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .comment-form textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #aaa;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+    .comment-form button {
+      margin-top: 10px;
+      background: #6a0dad;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .comment-form button:hover {
+      background: #4b0082;
+    }
+    .comment-list {
+      margin-top: 20px;
+    }
+    .comment {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .comment strong {
+      color: #9b5de5;
+    }
+    .works {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-bottom: 40px;
+}
+.works h3 {
+  margin-top: 0;
+  color: #333;
+}
+.books-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.book-card {
+  width: 140px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s;
+}
+.book-card:hover {
+  transform: scale(1.05);
+}
+.book-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+.book-card p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+  </style>
+</head>
+<body ng-controller="AuthorCtrl">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">📖<br/>BookBliss</div>
+    <button onclick="location.href='index.html'">Home</button>
+    <button onclick="location.href='browse.html'">Browse</button>
+    <button onclick="location.href='community.html'">Community</button>
+    <button onclick="location.href='settings.html'">Settings</button>
+    <button onclick="location.href='about.html'">About</button>
+    <button onclick="location.href='ai.html'">AI Support</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <h1>Author Details</h1>
+
+    <!-- Author Info -->
+    <div class="author-details" ng-if="author">
+      <img ng-src="{{author.photo}}" alt="{{author.name}}">
+      <div class="author-info">
+        <h2>{{author.name}}</h2>
+        <p><strong>Genre:</strong> {{author.genre}}</p>
+        <p><strong>Debut Year:</strong> {{author.debutYear}}</p>
+        <p>{{author.detail}}</p>
+      </div>
+    </div>
+<!-- Works Section -->
+<div class="works" ng-if="books.length > 0">
+  <h3>📚 Works by {{author.name}}</h3>
+  <div class="books-row">
+    <div class="book-card" ng-repeat="b in books" ng-click="goToBook(b._id)">
+      <img ng-src="{{b.cover || 'images/default-cover.jpg'}}" alt="{{b.title}}">
+      <p>{{b.title}}</p>
+    </div>
+  </div>
+</div>
+    <!-- Comments & Discussion -->
+    <div class="comments">
+      <h3>💬 Discussion</h3>
+      <form class="comment-form" ng-submit="addComment()">
+        <textarea ng-model="newComment" placeholder="Write a comment..." required></textarea>
+        <button type="submit">Post Comment</button>
+      </form>
+      <div class="comment-list">
+        <div class="comment" ng-repeat="c in comments track by $index">
+          <strong>User {{$index+1}}:</strong> {{c}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AngularJS -->
+  <script>
+    var app = angular.module('authorApp', []);
+
+   app.controller('AuthorCtrl', function($scope, $http) {
+  $scope.author = null;
+  $scope.books = [];
+  $scope.comments = [];
+  $scope.newComment = '';
+
+  const params = new URLSearchParams(window.location.search);
+  const authorId = params.get('id');
+
+  if(authorId){
+    // Fetch author details
+    $http.get('/api/authors/' + authorId).then(res => {
+      $scope.author = res.data;
+    }).catch(err => console.error('Error fetching author:', err));
+
+    // Fetch books by this author
+    $http.get('/api/books?author=' + authorId).then(res => {
+      $scope.books = res.data;
+    }).catch(err => console.error('Error fetching books:', err));
+  }
+
+  $scope.addComment = function(){
+    if($scope.newComment.trim()){
+      $scope.comments.push($scope.newComment.trim());
+      $scope.newComment = '';
+    }
+  };
+
+  $scope.goToBook = function(bookId){
+    window.location.href = 'book.html?id=' + bookId;
+  };
+});
+
+  </script>
+</body>
+</html>

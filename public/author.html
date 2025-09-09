@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="myApp" ng-controller="AdminCtrl">
+<html lang="en" ng-app="myApp" ng-controller="AuthorCtrl">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
+  <title>Admin - Manage Authors</title>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   
   <style>
@@ -65,7 +65,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    input[type="text"], input[type="number"], select {
+    input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
       margin: 6px 0;
@@ -94,13 +94,13 @@
     }
     .edit-btn:hover { background: #e68900; }
 
-    /* Books Grid */
-    .books-grid {
+    /* Authors Grid */
+    .authors-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
     }
-    .book-card {
+    .author-card {
       background: #fff;
       border-radius: 12px;
       padding: 15px;
@@ -109,21 +109,21 @@
       flex-direction: column;
       align-items: center;
     }
-    .book-cover {
+    .author-photo {
       width: 120px;
-      height: 180px;
+      height: 120px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 50%;
       margin-bottom: 10px;
     }
-    .book-info {
+    .author-info {
       text-align: center;
       margin-bottom: 10px;
     }
-    .book-info strong { color: #333; }
-    .rating { color: #ff9800; font-weight: bold; }
+    .author-info strong { color: #333; }
 
-    .edit-form input, .edit-form select {
+    /* Edit Form Inline */
+    .edit-form input {
       margin: 4px 0;
       font-size: 13px;
     }
@@ -162,49 +162,43 @@
 
   <!-- Main -->
   <div class="main">
-    <h2>📚 Add New Book</h2>
-    <form ng-submit="addBook()" name="bookForm">
-      <input type="text" ng-model="book.title" placeholder="Book Name" required>
-
-      <!-- Dropdown for Author -->
-<select ng-model="book.author" ng-options="a._id as a.name for a in authors" required>
-  <option value="">Select Author</option>
-</select>
-
-      <input type="number" ng-model="book.year" placeholder="Year" min="1000" max="2025" required>
-      <input type="text" ng-model="book.genre" placeholder="Genre" required>
-      <input type="text" ng-model="book.cover" placeholder="Cover Image URL">
-      <button type="submit" ng-disabled="bookForm.$invalid || loading">
-        {{loading ? 'Adding Book...' : 'Add Book'}}
+    <h2>✍ Add New Author</h2>
+    <form ng-submit="addAuthor()" name="authorForm">
+      <input type="text" ng-model="author.name" placeholder="Author Name" required>
+      <input type="text" ng-model="author.detail" placeholder="Details / Bio">
+      <input type="text" ng-model="author.genre" placeholder="Genre">
+      <input type="number" ng-model="author.debutYear" placeholder="Debut Year">
+      <input type="text" ng-model="author.photo" placeholder="Photo URL">
+      <button type="submit" ng-disabled="authorForm.$invalid || loading">
+        {{loading ? 'Adding Author...' : 'Add Author'}}
       </button>
     </form>
 
-    <h3>📖 Books List ({{books.length}} books)</h3>
-    <div class="books-grid">
-      <div class="book-card" ng-repeat="b in books track by b._id">
-        <img ng-if="b.cover" ng-src="{{b.cover}}" class="book-cover" alt="Book cover">
-        <div class="book-info" ng-if="!b.editing">
-          <strong>{{b.title}}</strong><br>
-          by {{b.author.name || 'Unknown'}} ({{b.year}})<br>
-          Genre: {{b.genre}}<br>
-          <span class="rating">⭐ {{b.rating || 'No rating'}}</span>
+    <h3>👩‍💼 Authors List ({{authors.length}})</h3>
+    <div class="authors-grid">
+      <div class="author-card" ng-repeat="a in authors track by a._id">
+        <img ng-if="a.photo" ng-src="{{a.photo}}" class="author-photo" alt="Author photo">
+        <div class="author-info" ng-if="!a.editing">
+          <strong>{{a.name}}</strong><br>
+          {{a.genre || 'Unknown Genre'}}<br>
+          Debut: {{a.debutYear || 'N/A'}}<br>
+          <p>{{a.detail || 'No details available'}}</p>
         </div>
 
         <!-- Edit Form -->
-        <div class="edit-form" ng-if="b.editing">
-          <input type="text" ng-model="b.title" placeholder="Book Name" required>
-     <select ng-model="b.author" ng-options="a._id as a.name for a in authors" required>
-</select>
-          <input type="number" ng-model="b.year" placeholder="Year" required>
-          <input type="text" ng-model="b.genre" placeholder="Genre" required>
-          <input type="text" ng-model="b.cover" placeholder="Cover URL">
-          <button ng-click="updateBook(b)">Save</button>
-          <button class="delete-btn" ng-click="b.editing=false">Cancel</button>
+        <div class="edit-form" ng-if="a.editing">
+          <input type="text" ng-model="a.name" placeholder="Author Name" required>
+          <input type="text" ng-model="a.detail" placeholder="Details / Bio">
+          <input type="text" ng-model="a.genre" placeholder="Genre">
+          <input type="number" ng-model="a.debutYear" placeholder="Debut Year">
+          <input type="text" ng-model="a.photo" placeholder="Photo URL">
+          <button ng-click="updateAuthor(a)">Save</button>
+          <button class="delete-btn" ng-click="a.editing=false">Cancel</button>
         </div>
 
-        <div ng-if="!b.editing">
-          <button class="edit-btn" ng-click="b.editing=true">Edit</button>
-          <button class="delete-btn" ng-click="deleteBook(b._id, $index)">Delete</button>
+        <div ng-if="!a.editing">
+          <button class="edit-btn" ng-click="a.editing=true">Edit</button>
+          <button class="delete-btn" ng-click="deleteAuthor(a._id, $index)">Delete</button>
         </div>
       </div>
     </div>
@@ -214,55 +208,45 @@
   <script>
     var app = angular.module('myApp', []);
 
-    app.controller('AdminCtrl', ['$scope', '$http', function($scope, $http) {
-      $scope.books = [];
-      $scope.authors = []; // for dropdown
-      $scope.book = { title: '', author: '', year: '', genre: '', cover: '', rating: 0 };
+    app.controller('AuthorCtrl', ['$scope', '$http', function($scope, $http) {
+      $scope.authors = [];
+      $scope.author = { name: '', detail: '', photo: '', genre: '', debutYear: '' };
       $scope.loading = false;
       $scope.serverConnected = false;
 
-      // Add book
-      $scope.addBook = function() {
+      // Add Author
+      $scope.addAuthor = function() {
         $scope.loading = true;
-        $http.post('/api/books', $scope.book).then(res => {
-          $scope.books.push(res.data);
-          $scope.book = { title: '', author: '', year: '', genre: '', cover: '', rating: 0 };
+        $http.post('/api/authors', $scope.author).then(res => {
+          $scope.authors.push(res.data);
+          $scope.author = { name: '', detail: '', photo: '', genre: '', debutYear: '' };
         }).catch(() => { $scope.serverConnected = false; })
         .finally(() => { $scope.loading = false; });
       };
 
-      // Delete book
-      $scope.deleteBook = function(id, idx) {
-        if (confirm('Delete this book?')) {
-          $http.delete('/api/books/' + id).then(() => {
-            $scope.books.splice(idx, 1);
+      // Delete Author
+      $scope.deleteAuthor = function(id, idx) {
+        if (confirm('Delete this author?')) {
+          $http.delete('/api/authors/' + id).then(() => {
+            $scope.authors.splice(idx, 1);
           });
         }
       };
 
-      // Update book
-      $scope.updateBook = function(b) {
-        $http.put('/api/books/' + b._id, b).then(() => {
-          b.editing = false;
+      // Update Author
+      $scope.updateAuthor = function(a) {
+        $http.put('/api/authors/' + a._id, a).then(() => {
+          a.editing = false;
         });
       };
 
-      // Load books
-      function loadBooks() {
-        $http.get('/api/books').then(res => {
-          $scope.books = res.data;
-          $scope.serverConnected = true;
-        }).catch(() => { $scope.serverConnected = false; });
-      }
-
-      // Load authors for dropdown
+      // Load Authors
       function loadAuthors() {
         $http.get('/api/authors').then(res => {
           $scope.authors = res.data;
-        });
+          $scope.serverConnected = true;
+        }).catch(() => { $scope.serverConnected = false; });
       }
-
-      loadBooks();
       loadAuthors();
     }]);
   </script>
