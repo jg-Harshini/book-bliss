@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Communities</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f5f9;
+    }
+
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      background: #7e57c2;
+      color: white;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 15px 0;
+      font-size: 16px;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+    }
+
+    .card h3 {
+      margin-bottom: 20px;
+      color: #5e35b1;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    textarea#description {
+      text-align: center;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      background: #5e35b1;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4527a0;
+    }
+
+    .community-list {
+      margin-top: 30px;
+    }
+
+    .community-card {
+      background: #f8f7fc;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>📊 Admin Panel</h2>
+    <a href="#">⚙ Manage Communities</a>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h3>Add New Community</h3>
+      <form id="communityForm">
+<label>Community Name:</label>
+<input type="text" id="name"><br><br>
+
+<label>Description:</label>
+<textarea id="description"></textarea><br><br>
+
+<label>Genre:</label>
+<input type="text" id="genre"><br><br>
+
+<button onclick="addCommunity()">Add Community</button>
+
+<h3>Existing Communities</h3>
+<ul id="communityList"></ul>
+      </form>
+      <div id="communityContainer"></div>
+    </div>
+  </div>
+
+<script>
+  async function addCommunity() {
+    const name = document.getElementById("name").value;
+    const description = document.getElementById("description").value;
+    const genre = document.getElementById("genre").value;
+
+    const response = await fetch("/api/community", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description, genre })
+    });
+
+    const data = await response.json();
+    alert(data.message || "Error adding community");
+    loadCommunities(); // refresh list
+  }
+
+  async function loadCommunities() {
+    const res = await fetch("/api/community");
+    const communities = await res.json();
+
+    const list = document.getElementById("communityList");
+    list.innerHTML = "";
+    communities.forEach(c => {
+      const li = document.createElement("li");
+      li.textContent = `${c.name} (${c.genre}) - ${c.description}`;
+      list.appendChild(li);
+    });
+  }
+
+  window.onload = loadCommunities;
+</script>
+</body>
+</html>

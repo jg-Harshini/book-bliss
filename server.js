@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/Admin');
 const authorRoutes = require('./routes/Author');
+const communityRoutes = require("./routes/community");
 
 const app = express();
 
@@ -26,6 +27,8 @@ mongoose.connect('mongodb+srv://thorhammer78165:fcHevi0MBKJ5l83P@cluster.a0zl0xi
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/authors', authorRoutes);
+app.use("/api/community", communityRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Login app is running...');
