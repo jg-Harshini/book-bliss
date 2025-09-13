@@ -14,15 +14,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get All Authors
+// ✅ Get All Authors (with optional name filter)
 router.get('/', async (req, res) => {
   try {
-    const authors = await Author.find().sort({ createdAt: -1 });
+    const query = {};
+    if (req.query.name) {
+      query.name = new RegExp(req.query.name, 'i'); // case-insensitive search
+    }
+    const authors = await Author.find(query).sort({ createdAt: -1 });
     res.json(authors);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching authors', error: err.message });
   }
 });
+
 
 // Get Single Author
 router.get('/:id', async (req, res) => {

@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/Admin');
 const authorRoutes = require('./routes/Author');
 const communityRoutes = require("./routes/community");
+const chatbotRoutes = require('./routes/chatbot');
+const openLibraryRoute = require('./routes/openLibrary');
 
 const app = express();
 
@@ -14,6 +16,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static('public')); // Serve frontend files
+
 
 // MongoDB connection
 mongoose.connect('mongodb+srv://thorhammer78165:fcHevi0MBKJ5l83P@cluster.a0zl0xi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster', {
@@ -28,6 +31,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/authors', authorRoutes);
 app.use("/api/community", communityRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/open-library', openLibraryRoute);
 
 
 app.get('/', (req, res) => {

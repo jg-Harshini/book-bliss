@@ -44,12 +44,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ✅ Get all books (optionally filter by author)
+// ✅ Get all books (optionally filter by author or genre)
 router.get('/', async (req, res) => {
   try {
     const query = {};
     if (req.query.author) {
-      query.author = req.query.author; // filter by authorId if provided
+      query.author = req.query.author; // filter by authorId
+    }
+    if (req.query.genre) {
+      query.genre = new RegExp(req.query.genre, 'i'); // case-insensitive match
     }
 
     const books = await Book.find(query)
@@ -62,6 +65,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Error fetching books', error: err.message });
   }
 });
+
 
 // ✅ Delete Book
 router.delete('/:id', async (req, res) => {
