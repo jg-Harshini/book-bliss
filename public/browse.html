@@ -43,6 +43,16 @@
       white-space: nowrap;
       width: 100%;
       padding: 10px 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar button.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: bold;
     }
 
     .logo {
@@ -174,7 +184,7 @@
       text-align: center;
       box-shadow: 0 8px 16px rgba(101, 78, 190, 0.15);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: default;
+      cursor: pointer;
     }
 
     .book:hover {
@@ -211,12 +221,12 @@
     
 
     .fade.ng-enter {
-      opacity: 30;
+      opacity: 0;
     }
 
     .fade.ng-enter-active {
-      opacity: 15;
-      transition: opacity 2s ease-in-out;
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
     }
 
     @media (max-width: 720px) {
@@ -235,11 +245,11 @@
 <body ng-controller="BrowseController">
   <div class="sidebar">
     <div class="logo">📖<span>BookBliss</span></div>
-    <button>Browse</button>
-    <button>Community</button>
-    <button>Settings</button>
-    <button>About</button>
-    <button>AI</button>
+    <button ng-click="navigateToPage('index.html')">🏠 Home</button>
+    <button ng-click="navigateToPage('browse.html')" class="active">🔍 Browse</button>
+    <button ng-click="navigateToPage('community.html')">👥 Community</button>
+    <button ng-click="navigateToPage('about.html')">ℹ️ About</button>
+    <button ng-click="navigateToPage('chatbot.html')">🤖 AI Chat</button>
   </div>
 
   <div class="main">
@@ -274,12 +284,30 @@
         </button>
       </div>
 
-      <div class="book-grid">
-<book-card class="fade"
-  ng-repeat="book in books | filter:masterFilter"
-  book="book">
-</book-card>
+      <!-- Loading and Error Messages -->
+      <div ng-show="loading.books" style="text-align: center; padding: 40px; color: #7a5de8;">
+        <div style="font-size: 24px; margin-bottom: 10px;">📚 Loading books...</div>
+      </div>
+      
+      <div ng-show="error.books" style="text-align: center; padding: 40px; color: #d32f2f; background: #ffebee; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 18px; font-weight: 600;">❌ {{ error.books }}</div>
+      </div>
 
+      <div ng-show="error.authors" style="text-align: center; padding: 20px; color: #d32f2f; background: #ffebee; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 16px; font-weight: 600;">❌ {{ error.authors }}</div>
+      </div>
+
+      <!-- No books message -->
+      <div ng-show="!loading.books && !error.books && (books | filter:masterFilter).length === 0" style="text-align: center; padding: 40px; color: #7a5de8;">
+        <div style="font-size: 20px;">📭 No books found matching your filters.</div>
+        <div style="font-size: 14px; margin-top: 10px; color: #7c6dbe;">Try adjusting your search criteria.</div>
+      </div>
+
+      <div class="book-grid" ng-show="!loading.books && !error.books">
+        <book-card class="fade"
+          ng-repeat="book in books | filter:masterFilter"
+          book="book">
+        </book-card>
       </div>
     </div>
   </div>
@@ -299,13 +327,18 @@ app.directive('bookCard', function () {
     restrict: 'E',
     scope: { book: '=' },
     template: `
-      <div class="book">
+      <div class="book" ng-click="navigateToBook(book._id)">
         <img ng-src="{{ book.cover }}" alt="Cover of {{ book.title }}">
         <div class="book-title">{{ book.title }}</div>
         <div class="book-date">By {{ book.author.name }} • {{ book.year }}</div>
         <div class="book-genre">{{ book.genre }}</div>
       </div>
-    `
+    `,
+    link: function(scope, element, attrs) {
+      scope.navigateToBook = function(bookId) {
+        window.location.href = `book.html?id=${bookId}`;
+      };
+    }
   };
 });
 
@@ -317,10 +350,17 @@ app.controller('BrowseController', function ($scope, $http, GenreFactory) {
   $scope.selectedGenre = "";
   $scope.selectedAuthor = "";
   $scope.yearFilter = { type: 'before', year: "" };
+  $scope.loading = { books: true, authors: true };
+  $scope.error = { books: null, authors: null };
 
   // Toggle Genre filter
   $scope.setGenre = function (genre) {
     $scope.selectedGenre = ($scope.selectedGenre === genre) ? "" : genre;
+  };
+
+  // Navigation function
+  $scope.navigateToPage = function (page) {
+    window.location.href = page;
   };
 
   // ✅ Author filter
@@ -343,19 +383,36 @@ app.controller('BrowseController', function ($scope, $http, GenreFactory) {
       : parseInt(book.year) > parseInt($scope.yearFilter.year);
   };
 
+  // ✅ Master filter function that combines all filters
+  $scope.masterFilter = function (book) {
+    return $scope.filterByAuthor(book) && 
+           $scope.filterByGenre(book) && 
+           $scope.filterByYear(book);
+  };
+
   // ✅ Fetch authors dynamically from Express API
-  $http.get("http://localhost:5000/api/authors")
+  $http.get("http://localhost:3000/api/authors")
     .then(function (response) {
-      $scope.authors = response.data; 
+      $scope.authors = response.data;
+      $scope.loading.authors = false;
     })
-    .catch(err => console.error("Error fetching authors:", err));
+    .catch(function(err) {
+      console.error("Error fetching authors:", err);
+      $scope.error.authors = "Failed to load authors. Please check if the server is running.";
+      $scope.loading.authors = false;
+    });
 
   // ✅ Fetch books dynamically from Express API
-  $http.get("http://localhost:5000/api/books")
+  $http.get("http://localhost:3000/api/books")
     .then(function (response) {
-      $scope.books = response.data; 
+      $scope.books = response.data;
+      $scope.loading.books = false;
     })
-    .catch(err => console.error("Error fetching books:", err));
+    .catch(function(err) {
+      console.error("Error fetching books:", err);
+      $scope.error.books = "Failed to load books. Please check if the server is running.";
+      $scope.loading.books = false;
+    });
 });
 </script>
 

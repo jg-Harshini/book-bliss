@@ -136,6 +136,27 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
     }
 
+    .author-info {
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .author-info:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(106, 13, 173, 0.3);
+    }
+
+    .author-info h3 {
+      color: #6a0dad;
+      margin: 0 0 10px 0;
+      font-size: 1.3rem;
+      transition: color 0.3s ease;
+    }
+
+    .author-info:hover h3 {
+      color: #4b0082;
+    }
+
     /* === Comments Section === */
     .comment-section { 
       background: white; 
@@ -204,13 +225,12 @@
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="logo">📖 BookBliss</div>
+    <div class="logo">📖<span> BookBliss</span></div>
     <button onclick="location.href='index.html'">🏠 Home</button>
-    <button onclick="location.href='browse.html'">📚 Browse</button>
-    <button onclick="location.href='community.html'">💬 Community</button>
-    <button onclick="location.href='settings.html'">⚙️ Settings</button>
+    <button onclick="location.href='browse.html'">🔍 Browse</button>
+    <button onclick="location.href='community.html'">👥 Community</button>
     <button onclick="location.href='about.html'">ℹ️ About</button>
-    <button onclick="location.href='ai.html'">🤖 AI Support</button>
+    <button onclick="location.href='chatbot.html'">🤖 AI Chat</button>
   </div>
 
   <!-- Main -->

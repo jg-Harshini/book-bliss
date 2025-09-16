@@ -19,6 +19,7 @@
       color: #333;
       overflow-x: hidden;
       position: relative;
+      display: flex;
     }
 
     /* Animated background particles */
@@ -484,12 +485,73 @@
       70% { transform: scale(0.9); }
       100% { transform: scale(1); }
     }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 180px;
+      background-color: #9b5de5;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      position: fixed;
+      height: 100vh;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+
+    .sidebar .logo {
+      font-size: 1.5rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
+      text-align: center;
+      white-space: nowrap;
+      width: 100%;
+      padding: 12px 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar button.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: bold;
+    }
+
+    .main-content {
+      margin-left: 180px;
+      width: calc(100% - 180px);
+    }
   </style>
 </head>
 <body>
-  <div class="bg-animation" id="particles"></div>
-  
-  <header>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">📖 BookBliss</div>
+    <button onclick="location.href='index.html'">🏠 Home</button>
+    <button onclick="location.href='browse.html'">🔍 Browse</button>
+    <button onclick="location.href='community.html'">👥 Community</button>
+    <button onclick="location.href='about.html'" class="active">ℹ️ About</button>
+    <button onclick="location.href='chatbot.html'">🤖 AI Chat</button>
+  </div>
+
+  <div class="main-content">
+    <div class="bg-animation" id="particles"></div>
+    
+    <header>
     <h1>About Book Bliss</h1>
     <p>Your Perfect Book Partner</p>
   </header>
@@ -603,5 +665,6 @@
       addInteractiveEffects();
     });
   </script>
+  </div> <!-- End main-content -->
 </body>
 </html>
