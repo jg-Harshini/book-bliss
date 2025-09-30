@@ -23,6 +23,7 @@ angular.module('myApp').controller('AuthCtrl', ['$scope', '$http', function($sco
     }).then(function(response) {
       $scope.message = response.data.message;
       localStorage.setItem('userId', response.data.userId);
+      if (response.data.role) localStorage.setItem('role', response.data.role);
     }, function(error) {
       $scope.message = error.data.message;
     });

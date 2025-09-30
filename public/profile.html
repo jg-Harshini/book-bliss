@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bookApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile - BookBliss</title>
+  <link rel="stylesheet" href="style1.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="script.js"></script>
+  <style>
+    .profile-container { max-width: 800px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .profile-header { display: flex; align-items: center; gap: 16px; }
+    .profile-header img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #9b5de5; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .form-row label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .form-row input, .form-row textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+    .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+    .btn { background: #6a1b9a; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .notice { margin-top: 10px; color: #2e7d32; }
+    .error { margin-top: 10px; color: #c62828; }
+  </style>
+</head>
+<body ng-controller="ProfileController">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="logo">📖 BookBliss</div>
+      <nav>
+        <ul>
+          <li><a href="index.html">🏠 Home</a></li>
+          <li><a href="browse.html">🔍 Browse</a></li>
+          <li><a href="community.html">👥 Community</a></li>
+          <li><a href="profile.html" class="active">👤 Profile</a></li>
+          <li><a href="about.html">ℹ️ About</a></li>
+          <li><a href="chatbot.html">🤖 AI Chat</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="profile-container" ng-if="!loading">
+        <div class="profile-header">
+          <img ng-src="{{ profile.avatarUrl || 'https://via.placeholder.com/80' }}" alt="avatar" />
+          <div>
+            <h2>{{ profile.displayName || (user && user.username) || 'Your Profile' }}</h2>
+            <div>{{ profile.email }}</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label>Display Name</label>
+            <input type="text" ng-model="profile.displayName" />
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" ng-model="profile.email" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Avatar URL</label>
+            <input type="url" ng-model="profile.avatarUrl" />
+          </div>
+          <div>
+            <label>Location</label>
+            <input type="text" ng-model="profile.location" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Favorite Genres (comma separated)</label>
+            <input type="text" ng-model="profile.favoriteGenresCsv" placeholder="Fantasy, Mystery, Sci-Fi" />
+          </div>
+          <div>
+            <label>Preferred Formats (comma separated)</label>
+            <input type="text" ng-model="profile.preferredFormatsCsv" placeholder="ebook, paperback, audiobook" />
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns: 1fr;">
+          <div>
+            <label>Bio</label>
+            <textarea rows="4" ng-model="profile.bio"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" ng-click="save()" ng-disabled="saving">Save</button>
+        </div>
+        <div class="notice" ng-if="success">{{ success }}</div>
+        <div class="error" ng-if="error">{{ error }}</div>
+      </div>
+      <div ng-if="loading" style="padding: 24px;">Loading...</div>
+    </main>
+  </div>
+</body>
+</html>

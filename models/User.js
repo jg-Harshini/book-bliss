@@ -3,8 +3,19 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
-});
+  password: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  profile: {
+    displayName: { type: String },
+    email: { type: String },
+    avatarUrl: { type: String },
+    bio: { type: String },
+    favoriteGenres: [{ type: String }],
+    preferredFormats: [{ type: String }], // e.g., 'ebook', 'paperback', 'hardcover', 'audiobook'
+    location: { type: String }
+  },
+  joinedCommunities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Community' }]
+}, { timestamps: true });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

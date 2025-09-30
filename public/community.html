@@ -6,7 +6,8 @@
   <title>BookBliss Community Chat</title>
   <link rel="stylesheet" href="style1.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-  <script src="script.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js?v=3"></script>
 </head>
 <body ng-controller="ChatController">
 
@@ -18,6 +19,7 @@
           <li><a href="index.html">🏠 Home</a></li>
           <li><a href="browse.html">🔍 Browse</a></li>
           <li><a href="community.html" class="active">👥 Community</a></li>
+          <li><a href="profile.html">👤 Profile</a></li>
           <li><a href="about.html">ℹ️ About</a></li>
           <li><a href="chatbot.html">🤖 AI Chat</a></li>
         </ul>
@@ -27,8 +29,10 @@
         <h3>Communities</h3>
         <input type="text" ng-model="searchText" placeholder="Search..." class="community-search" />
         <ul>
-          <li ng-repeat="name in getFilteredCommunities()" ng-click="selectCommunity(name)">
-            {{ name }}
+          <li ng-repeat="c in getFilteredCommunities()">
+            <div ng-click="selectCommunity(c)">{{ c.name }}</div>
+            <button ng-if="!isJoined(c) && role !== 'admin'" ng-click="joinCommunity(c)" style="margin-top:6px;">Join</button>
+            <span ng-if="isJoined(c)">Joined</span>
           </li>
         </ul>
       </div>
@@ -36,22 +40,26 @@
 
     <main class="chat-section">
       <header class="chat-header">
-        <div class="chat-title">{{ selectedCommunity || 'Select a Community' }}</div>
-        <div class="time-filter">
-          <input type="date" ng-model="selectedDate" ng-change="filterMessages()" />
+        <div class="chat-title">{{ (selectedCommunity && selectedCommunity.name) || 'Select a Community' }}</div>
+        <div class="time-filter" style="font-size:12px;opacity:.7">
+          <!-- debug: -->
+          <span ng-if="hasSocket">Realtime: on</span>
+          <span ng-if="!hasSocket">Realtime: off</span>
         </div>
       </header>
 
       <div class="chat-box" id="chatBox">
-        <div class="message" ng-repeat="msg in filteredMessages" ng-class="{'user': msg.sender === 'User'}">
-          <strong>{{ msg.sender }}:</strong> {{ msg.text }}
-          <div class="timestamp">{{ msg.time | date:'mediumDate' }}</div>
+        <div class="message" ng-repeat="msg in messages" ng-class="{'user': messageIsMine(msg)}">
+          <strong>{{ messageIsMine(msg) ? 'You' : ((msg.sender && msg.sender.profile && msg.sender.profile.displayName) || (msg.sender && msg.sender.username) || 'User') }}:</strong>
+          {{ msg.text }}
+          <div class="timestamp">{{ msg.createdAt | date:'short' }}</div>
         </div>
       </div>
 
       <footer class="chat-input" ng-if="selectedCommunity">
         <input type="text" ng-model="userMessage" placeholder="Type a message..." />
         <button ng-click="sendMessage()">Send</button>
+        <span style="margin-left:10px;color:#c62828" ng-if="sendError">{{ sendError }}</span>
       </footer>
     </main>
   </div>
