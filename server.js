@@ -30,10 +30,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // Serve frontend files
 
 
 // MongoDB connection
-mongoose.connect('mongodb+srv://thorhammer78165:fcHevi0MBKJ5l83P@cluster.a0zl0xi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect('mongodb+srv://thorhammer78165:fcHevi0MBKJ5l83P@cluster.a0zl0xi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster')
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB error:', err));
 
@@ -53,34 +50,67 @@ app.get('/', (req, res) => {
 
 // Socket.IO - real-time community chat
 io.on('connection', (socket) => {
+  console.log('\n=== New Socket.io connection ===');
+  console.log('Socket ID:', socket.id);
+  console.log('Transport:', socket.conn.transport.name);
+  
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', socket.id, 'Reason:', reason);
+  });
+  
   // client requests to join a community room for live updates
   socket.on('joinCommunity', ({ communityId }) => {
-    if (!communityId) return;
+    if (!communityId) {
+      console.log('joinCommunity: missing communityId');
+      return;
+    }
     const room = `community:${communityId}`;
     socket.join(room);
+    console.log(`Socket ${socket.id} joined room: ${room}`);
   });
 
   // client sends a message
   socket.on('sendMessage', async ({ communityId, userId, text }, ack) => {
+    console.log('\n=== sendMessage received ===');
+    console.log('From socket:', socket.id);
+    console.log('Payload:', { communityId, userId, text: text ? text.substring(0, 50) : null });
+    
     try {
       if (!communityId || !userId || !text) {
+        console.log('Validation failed: missing required fields');
         return ack && ack({ error: 'communityId, userId and text are required' });
       }
+      
       const [user, community] = await Promise.all([
         User.findById(userId),
         Community.findById(communityId)
       ]);
-      if (!user || !community) return ack && ack({ error: 'User or Community not found' });
+      
+      if (!user || !community) {
+        console.log('User or Community not found:', { user: !!user, community: !!community });
+        return ack && ack({ error: 'User or Community not found' });
+      }
+      
       const isMember = (user.joinedCommunities || []).some((c) => String(c) === String(community._id));
-      if (!isMember) return ack && ack({ error: 'Join the community to send messages' });
+      if (!isMember) {
+        console.log('User is not a member of the community');
+        return ack && ack({ error: 'Join the community to send messages' });
+      }
 
       const msg = await new Message({ community: community._id, sender: user._id, text }).save();
       const populated = await msg.populate('sender', 'username profile.displayName');
+      
       const room = `community:${communityId}`;
+      console.log('Broadcasting message to room:', room);
+      console.log('Message ID:', msg._id);
+      console.log('Sender:', populated.sender.username);
+      
       io.to(room).emit('newMessage', populated);
+      console.log('Message broadcast successful');
+      
       return ack && ack({ ok: true });
     } catch (err) {
-      console.error('socket sendMessage error', err);
+      console.error('socket sendMessage error:', err);
       return ack && ack({ error: 'Error sending message' });
     }
   });

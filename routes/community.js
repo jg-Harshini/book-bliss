@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
 // GET: Fetch all communities
 router.get("/", async (req, res) => {
   try {
-    const communities = await Community.find();
+    const communities = await Community.find().populate('members', '_id username');
     res.json(communities);
   } catch (err) {
     res.status(500).json({ error: err.message });

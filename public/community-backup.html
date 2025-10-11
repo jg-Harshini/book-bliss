@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style1.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js?v=20251011060700"></script>
+  <script src="/script.js?nocache=<?php echo time(); ?>"></script>
 </head>
 <body ng-controller="ChatController">
 
@@ -58,7 +58,7 @@
       </div>
 
       <footer class="chat-input" ng-if="selectedCommunity">
-        <input type="text" ng-model="userMessage" id="messageInput" placeholder="Type a message..." ng-keypress="$event.keyCode == 13 && sendMessage()" />
+        <input type="text" ng-model="userMessage" placeholder="Type a message..." />
         <button ng-click="sendMessage()">Send</button>
         <span style="margin-left:10px;color:#c62828" ng-if="sendError">{{ sendError }}</span>
       </footer>

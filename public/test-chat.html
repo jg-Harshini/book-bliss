@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Chat</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body ng-app="testApp" ng-controller="TestCtrl">
+  <h1>Quick Test</h1>
+  
+  <div>
+    <p>User ID: {{ userId || 'Not logged in' }}</p>
+    <p>Socket Connected: {{ socketConnected }}</p>
+    <p>Selected Community: {{ selectedCommunity || 'None' }}</p>
+  </div>
+  
+  <div>
+    <h3>Select Community:</h3>
+    <button ng-click="selectCommunity('68c2d59746010a0cf7ec4ba8', 'NovaMinds')">NovaMinds</button>
+  </div>
+  
+  <div ng-if="selectedCommunity">
+    <h3>Send Message:</h3>
+    <input type="text" ng-model="message" placeholder="Type message">
+    <button ng-click="send()">SEND</button>
+    <p style="color:red">{{ error }}</p>
+    <p style="color:green">{{ success }}</p>
+  </div>
+  
+  <div>
+    <h3>Messages:</h3>
+    <div ng-repeat="msg in messages">
+      <strong>{{ msg.sender?.username || 'User' }}:</strong> {{ msg.text }}
+    </div>
+  </div>
+  
+  <script>
+    angular.module('testApp', [])
+      .controller('TestCtrl', function($scope, $http) {
+        console.log('=== TEST CONTROLLER LOADED ===');
+        
+        $scope.userId = localStorage.getItem('userId');
+        $scope.message = '';
+        $scope.messages = [];
+        $scope.error = '';
+        $scope.success = '';
+        $scope.selectedCommunity = null;
+        $scope.socketConnected = false;
+        
+        // Initialize socket
+        var socket = io();
+        
+        socket.on('connect', function() {
+          console.log('Socket connected!');
+          $scope.$apply(function() {
+            $scope.socketConnected = true;
+          });
+        });
+        
+        socket.on('disconnect', function() {
+          console.log('Socket disconnected!');
+          $scope.$apply(function() {
+            $scope.socketConnected = false;
+          });
+        });
+        
+        socket.on('newMessage', function(msg) {
+          console.log('New message received:', msg);
+          $scope.$apply(function() {
+            $scope.messages.push(msg);
+          });
+        });
+        
+        $scope.selectCommunity = function(id, name) {
+          console.log('Selecting community:', id, name);
+          $scope.selectedCommunity = id;
+          socket.emit('joinCommunity', { communityId: id });
+          
+          // Load messages
+          $http.get('/api/community/' + id + '/messages')
+            .then(function(response) {
+              $scope.messages = response.data;
+              console.log('Messages loaded:', $scope.messages.length);
+            });
+        };
+        
+        $scope.send = function() {
+          console.log('=== SEND CLICKED ===');
+          console.log('Message:', $scope.message);
+          console.log('UserId:', $scope.userId);
+          console.log('Community:', $scope.selectedCommunity);
+          
+          $scope.error = '';
+          $scope.success = '';
+          
+          if (!$scope.userId) {
+            $scope.error = 'Not logged in';
+            return;
+          }
+          
+          if (!$scope.message) {
+            $scope.error = 'Enter a message';
+            return;
+          }
+          
+          if (!$scope.selectedCommunity) {
+            $scope.error = 'Select a community';
+            return;
+          }
+          
+          console.log('Sending via socket...');
+          socket.emit('sendMessage', {
+            communityId: $scope.selectedCommunity,
+            userId: $scope.userId,
+            text: $scope.message
+          }, function(response) {
+            console.log('Server response:', response);
+            $scope.$apply(function() {
+              if (response && response.error) {
+                $scope.error = response.error;
+              } else {
+                $scope.success = 'Message sent!';
+                $scope.message = '';
+              }
+            });
+          });
+        };
+      });
+  </script>
+</body>
+</html>
