@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style1.css" />
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js?v=20251011060700"></script>
+  <script src="script.js?v=20251011064200"></script>
 </head>
 <body ng-controller="ChatController">
 
@@ -41,13 +41,48 @@
 
     <main class="chat-section">
       <header class="chat-header">
-        <div class="chat-title">{{ (selectedCommunity && selectedCommunity.name) || 'Select a Community' }}</div>
+        <div class="chat-title" ng-click="toggleCommunityDetails()" style="cursor:pointer;" title="Click for community details">
+          {{ (selectedCommunity && selectedCommunity.name) || 'Select a Community' }}
+          <span ng-if="selectedCommunity" style="font-size:14px;margin-left:8px;">ℹ️</span>
+        </div>
         <div class="time-filter" style="font-size:12px;opacity:.8">
           <span ng-if="socketConnected" style="color:#4caf50">● Connected</span>
           <span ng-if="hasSocket && !socketConnected" style="color:#ff9800">● Connecting...</span>
           <span ng-if="!hasSocket" style="color:#f44336">● Offline</span>
         </div>
       </header>
+
+      <!-- Community Details Panel -->
+      <div ng-if="showCommunityDetails && selectedCommunity" style="background:#f5f5f5;padding:20px;border-bottom:2px solid #ddd;position:relative;">
+        <button ng-click="closeCommunityDetails()" style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;color:#666;">✕</button>
+        
+        <h2 style="margin:0 0 15px 0;color:#6a1b9a;">{{ selectedCommunity.name }}</h2>
+        
+        <div style="margin-bottom:10px;">
+          <strong>Description:</strong>
+          <p style="margin:5px 0;color:#555;">{{ selectedCommunity.description || 'No description available' }}</p>
+        </div>
+        
+        <div style="margin-bottom:10px;">
+          <strong>Genre:</strong>
+          <span style="margin-left:8px;padding:4px 12px;background:#6a1b9a;color:white;border-radius:12px;font-size:12px;">{{ selectedCommunity.genre || 'General' }}</span>
+        </div>
+        
+        <div style="margin-bottom:10px;">
+          <strong>Members:</strong>
+          <span style="margin-left:8px;color:#555;">{{ (selectedCommunity.members && selectedCommunity.members.length) || 0 }} member(s)</span>
+        </div>
+        
+        <div ng-if="selectedCommunity.members && selectedCommunity.members.length > 0" style="margin-top:15px;">
+          <strong>Member List:</strong>
+          <ul style="margin:8px 0;padding-left:20px;max-height:150px;overflow-y:auto;">
+            <li ng-repeat="member in selectedCommunity.members" style="margin:4px 0;color:#555;">
+              {{ member.username || member.profile.displayName || 'User' }}
+              <span ng-if="String(member._id) === userId" style="color:#4caf50;font-weight:bold;">(You)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <div class="chat-box" id="chatBox">
         <div class="message" ng-repeat="msg in messages" ng-class="{'user': messageIsMine(msg)}">

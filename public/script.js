@@ -156,6 +156,7 @@ angular.module("bookApp", [])
     $scope.sendError = '';
     $scope.role = AuthContext.getRole();
     var userId = AuthContext.getUserId();
+    $scope.userId = userId; // Expose to template
     
     // Initialize socket connection and track status
     if (Socket) {
@@ -444,6 +445,19 @@ angular.module("bookApp", [])
 
     $scope.messageIsMine = function(msg) {
       return userId && msg.sender && (String(msg.sender._id || msg.sender) === String(userId));
+    };
+
+    // Community details modal
+    $scope.showCommunityDetails = false;
+    
+    $scope.toggleCommunityDetails = function() {
+      if (!$scope.selectedCommunity) return;
+      $scope.showCommunityDetails = !$scope.showCommunityDetails;
+      console.log('Toggle community details:', $scope.showCommunityDetails);
+    };
+    
+    $scope.closeCommunityDetails = function() {
+      $scope.showCommunityDetails = false;
     };
 
     // Initialize
