@@ -363,35 +363,133 @@
     }
   }
 
-  class CommentService {
-    constructor() { this.comments = []; }
-    getAll() { return this.comments; }
-    add(text) { const id = Date.now(); const comment = { id, text }; this.comments.unshift(comment); return comment; }
-    delete(id) { this.comments = this.comments.filter(c => c.id !== id); }
+  // Get logged-in user ID from localStorage
+  function getCurrentUserId() {
+    return localStorage.getItem('userId');
   }
-  const commentService = new CommentService();
+
+  function getCurrentUsername() {
+    return localStorage.getItem('username') || 'Guest';
+  }
+
   const listEl = document.getElementById('comment-list');
+  let allComments = [];
+
+  // Fetch comments for this book
+  async function fetchComments() {
+    if (!bookId) return;
+    try {
+      const res = await fetch(`/api/comments/book/${bookId}`);
+      if (res.ok) {
+        allComments = await res.json();
+        renderComments();
+      }
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    }
+  }
 
   function renderComments() {
     listEl.innerHTML = '';
-    commentService.getAll().forEach(comment => {
+    const currentUserId = getCurrentUserId();
+    
+    if (allComments.length === 0) {
+      listEl.innerHTML = '<p style="color:#999;font-style:italic;">No comments yet. Be the first to comment!</p>';
+      return;
+    }
+    
+    allComments.forEach(comment => {
       const div = document.createElement('div');
       div.className = 'comment';
-      div.innerHTML = `<p>${comment.text}</p>
-                       <button onclick="deleteComment(${comment.id})">Delete</button>`;
+      const authorName = (comment.author && comment.author.profile && comment.author.profile.displayName) 
+                      || (comment.author && comment.author.username) 
+                      || 'Anonymous';
+      const isOwner = currentUserId && comment.author && String(comment.author._id) === String(currentUserId);
+      const deleteBtn = isOwner ? `<button onclick="deleteComment('${comment._id}')">Delete</button>` : '';
+      
+      const timeStr = comment.createdAt ? new Date(comment.createdAt).toLocaleString() : '';
+      
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="flex:1;">
+            <strong style="color:#6a0dad;">${authorName}</strong> 
+            <span style="font-size:11px;color:#999;margin-left:8px;">${timeStr}</span>
+            <p style="margin:8px 0 0 0;">${comment.text}</p>
+          </div>
+          ${deleteBtn}
+        </div>
+      `;
       listEl.appendChild(div);
     });
   }
 
-  function addComment() {
+  async function addComment() {
     const input = document.getElementById('comment-input');
     const text = input.value.trim();
-    if (text) { commentService.add(text); input.value = ''; renderComments(); }
+    const userId = getCurrentUserId();
+    
+    if (!userId) {
+      alert('Please log in to post a comment.');
+      return;
+    }
+    
+    if (!text) {
+      alert('Please enter a comment.');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/comments/book/${bookId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, text })
+      });
+      
+      if (res.ok) {
+        input.value = '';
+        await fetchComments(); // Reload comments
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to post comment');
+      }
+    } catch (err) {
+      console.error('Error posting comment:', err);
+      alert('Error posting comment');
+    }
   }
-  function deleteComment(id) { commentService.delete(id); renderComments(); }
+  
+  async function deleteComment(commentId) {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert('Please log in to delete comments.');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      
+      if (res.ok) {
+        await fetchComments(); // Reload comments
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to delete comment');
+      }
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      alert('Error deleting comment');
+    }
+  }
 
   fetchBook();
-  renderComments();
+  fetchComments();
   </script>
 </body>
 </html>

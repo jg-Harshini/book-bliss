@@ -127,8 +127,16 @@
       margin-top: 20px;
     }
     .comment {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .comment:hover {
+      background: #f0f0f0;
     }
     .comment strong {
       color: #9b5de5;
@@ -216,8 +224,16 @@
         <button type="submit">Post Comment</button>
       </form>
       <div class="comment-list">
-        <div class="comment" ng-repeat="c in comments track by $index">
-          <strong>User {{$index+1}}:</strong> {{c}}
+        <p ng-if="comments.length === 0" style="color:#999;font-style:italic;">No comments yet. Be the first to comment!</p>
+        <div class="comment" ng-repeat="c in comments track by c._id" style="position:relative;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+              <strong style="color:#9b5de5;">{{getCommentAuthor(c)}}</strong>
+              <span style="font-size:11px;color:#999;margin-left:8px;">{{c.createdAt | date:'short'}}</span>
+              <p style="margin:8px 0 0 0;">{{c.text}}</p>
+            </div>
+            <button ng-if="isCommentOwner(c)" ng-click="deleteComment(c._id)" style="background:#ff4d4d;color:white;border:none;padding:4px 10px;font-size:12px;border-radius:6px;cursor:pointer;">Delete</button>
+          </div>
         </div>
       </div>
     </div>
@@ -232,6 +248,7 @@
   $scope.books = [];
   $scope.comments = [];
   $scope.newComment = '';
+  $scope.currentUserId = localStorage.getItem('userId');
 
   const params = new URLSearchParams(window.location.search);
   const authorId = params.get('id');
@@ -246,13 +263,72 @@
     $http.get('/api/books?author=' + authorId).then(res => {
       $scope.books = res.data;
     }).catch(err => console.error('Error fetching books:', err));
+    
+    // Fetch comments for this author
+    fetchComments();
+  }
+  
+  function fetchComments() {
+    if (!authorId) return;
+    $http.get('/api/comments/author/' + authorId)
+      .then(res => {
+        $scope.comments = res.data;
+      })
+      .catch(err => console.error('Error fetching comments:', err));
   }
 
   $scope.addComment = function(){
-    if($scope.newComment.trim()){
-      $scope.comments.push($scope.newComment.trim());
-      $scope.newComment = '';
+    if (!$scope.currentUserId) {
+      alert('Please log in to post a comment.');
+      return;
     }
+    
+    if($scope.newComment.trim()){
+      $http.post('/api/comments/author/' + authorId, {
+        userId: $scope.currentUserId,
+        text: $scope.newComment.trim()
+      }).then(res => {
+        $scope.newComment = '';
+        fetchComments();
+      }).catch(err => {
+        console.error('Error posting comment:', err);
+        alert('Failed to post comment');
+      });
+    }
+  };
+  
+  $scope.deleteComment = function(commentId) {
+    if (!$scope.currentUserId) {
+      alert('Please log in to delete comments.');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+    
+    $http.delete('/api/comments/' + commentId, {
+      data: { userId: $scope.currentUserId },
+      headers: { 'Content-Type': 'application/json' }
+    }).then(res => {
+      fetchComments();
+    }).catch(err => {
+      console.error('Error deleting comment:', err);
+      const errorMsg = err.data && err.data.error ? err.data.error : 'Failed to delete comment';
+      alert(errorMsg);
+    });
+  };
+  
+  $scope.isCommentOwner = function(comment) {
+    return $scope.currentUserId && comment.author && 
+           String(comment.author._id) === String($scope.currentUserId);
+  };
+  
+  $scope.getCommentAuthor = function(comment) {
+    if (!comment.author) return 'Anonymous';
+    return (comment.author.profile && comment.author.profile.displayName) || 
+           comment.author.username || 
+           'Anonymous';
   };
 
   $scope.goToBook = function(bookId){

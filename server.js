@@ -12,6 +12,7 @@ const communityRoutes = require("./routes/community");
 const chatbotRoutes = require('./routes/chatbot');
 const openLibraryRoute = require('./routes/openLibrary');
 const userRoutes = require('./routes/users');
+const commentRoutes = require('./routes/comments');
 
 // Models used by socket events
 const User = require('./models/User');
@@ -42,6 +43,7 @@ app.use("/api/community", communityRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/open-library', openLibraryRoute);
 app.use('/api/users', userRoutes);
+app.use('/api/comments', commentRoutes);
 
 
 app.get('/', (req, res) => {
