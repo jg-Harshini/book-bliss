@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookBliss Community Chat</title>
-  <link rel="stylesheet" href="style1.css" />
+  <link rel="stylesheet" href="style1.css?v=20251011064800" />
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js?v=20251011064200"></script>
+  <script src="script.js?v=20251011064800"></script>
 </head>
 <body ng-controller="ChatController">
 
@@ -86,9 +86,23 @@
 
       <div class="chat-box" id="chatBox">
         <div class="message" ng-repeat="msg in messages" ng-class="{'user': messageIsMine(msg)}">
-          <strong>{{ messageIsMine(msg) ? 'You' : ((msg.sender && msg.sender.profile && msg.sender.profile.displayName) || (msg.sender && msg.sender.username) || 'User') }}:</strong>
-          {{ msg.text }}
-          <div class="timestamp">{{ msg.createdAt | date:'short' }}</div>
+          <!-- Avatar -->
+          <div class="message-avatar">
+            {{ (messageIsMine(msg) ? 'You' : ((msg.sender && msg.sender.profile && msg.sender.profile.displayName) || (msg.sender && msg.sender.username) || 'User')).charAt(0) }}
+          </div>
+          
+          <!-- Message Content -->
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-author">
+                {{ messageIsMine(msg) ? 'You' : ((msg.sender && msg.sender.profile && msg.sender.profile.displayName) || (msg.sender && msg.sender.username) || 'User') }}
+              </span>
+              <span class="message-time">{{ msg.createdAt | date:'short' }}</span>
+            </div>
+            <div class="message-bubble">
+              {{ msg.text }}
+            </div>
+          </div>
         </div>
       </div>
 
